@@ -25,11 +25,12 @@ from sensor_msgs.msg import Image
 from ultralytics import YOLO
 from vision_msgs.msg import Detection2D, Detection2DArray, ObjectHypothesisWithPose
 from ultralytics_ros.msg import YoloResult
+from ultralytics_ros.msg import KeyPoints
 
 
 class TrackerNode:
     def __init__(self):
-        yolo_model = rospy.get_param("~yolo_model", "yolov8n-pose.pt")
+        yolo_model = rospy.get_param("~yolo_model", "yolov8n-pose")   
         self.input_topic = rospy.get_param("~input_topic", "hsrb/head_rgbd_sensor/rgb/image_raw")
         self.result_topic = rospy.get_param("~result_topic", "yolo_result")
         self.result_image_topic = rospy.get_param("~result_image_topic", "yolo_image")
@@ -88,6 +89,10 @@ class TrackerNode:
                 yolo_result_msg.masks = self.create_segmentation_masks(results)
             self.results_pub.publish(yolo_result_msg)
             self.result_image_pub.publish(yolo_result_image_msg)
+            keypoints_list = self.create_keypoints_array(results)
+            keypoints_msg = KeyPoints()
+            for keypoint in keypoints_list:
+                pass
 
     def create_detections_array(self, results):
         detections_msg = Detection2DArray()
@@ -135,6 +140,25 @@ class TrackerNode:
                     )
                     masks_msg.append(mask_image_msg)
         return masks_msg
+    
+    def create_keypoints_array(self, results):
+        '''
+        0: Nose 1: Left Eye 2: Right Eye 3: Left Ear 4: Right Ear 
+        5: Left Shoulder 6: Right Shoulder 7: Left Elbow 8: Right Elbow 9: Left Wrist 
+        10: Right Wrist 11: Left Hip 12: Right Hip 13: Left Knee 14: Right Knee 
+        15: Left Ankle 16: Right Ankle
+        '''
+        # keypoints_msg = []
+        for result in results:
+            if hasattr(result, "keypoints") and result.keypoints is not None:
+                for keypoints_tensor in result.keypoints.data:
+                    keypoints_list = keypoints_tensor.data.to("cpu").detach().tolist()
+                    # keypoints_list.shape = [1, 17, 3]
+                    keypoints_list = keypoints_list[0]  # TODO: Confirm if the first dimension isß batch dimension
+                    # keypoints_list.shape = [17, 3]
+                    keypoints_filtered_list = [keypoints_list[i] for i in [5, 6, 9, 10]]   # we only care about the shoulders and wrists
+                    # keypoints_msg.shape = [4, 3]
+        return keypoints_filtered_list
 
 
 if __name__ == "__main__":

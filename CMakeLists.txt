@@ -31,6 +31,7 @@ find_package(PCL REQUIRED)
 add_message_files(
   FILES
   YoloResult.msg
+  KeyPoints.msg
 )
 
 generate_messages(
@@ -38,6 +39,7 @@ generate_messages(
   sensor_msgs
   std_msgs
   vision_msgs
+  geometry_msgs
 )
 
 catkin_package(
