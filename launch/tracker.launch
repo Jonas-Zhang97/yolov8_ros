@@ -18,7 +18,9 @@
   <arg name="result_labels" default="true"/>
   <arg name="result_boxes" default="true"/>
 
-  <node name="tracker_node" pkg="ultralytics_ros" type="tracker_node.py" output="screen">
+  <arg name="node_name" default="tracker_node"/>
+
+  <node name="$(arg node_name)" pkg="ultralytics_ros" type="tracker_node.py" output="screen">
     <param name="yolo_model" value="$(arg yolo_model)"/>
     <param name="input_topic" value="$(arg input_topic)"/>
     <param name="result_topic" value="$(arg result_topic)"/>

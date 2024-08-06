@@ -29,8 +29,8 @@ from ultralytics_ros.msg import YoloResult
 
 class TrackerNode:
     def __init__(self):
-        yolo_model = rospy.get_param("~yolo_model", "yolov8n.pt")
-        self.input_topic = rospy.get_param("~input_topic", "image_raw")
+        yolo_model = rospy.get_param("~yolo_model", "yolov8n-pose.pt")
+        self.input_topic = rospy.get_param("~input_topic", "hsrb/head_rgbd_sensor/rgb/image_raw")
         self.result_topic = rospy.get_param("~result_topic", "yolo_result")
         self.result_image_topic = rospy.get_param("~result_image_topic", "yolo_image")
         self.conf_thres = rospy.get_param("~conf_thres", 0.25)
